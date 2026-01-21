@@ -32,6 +32,11 @@
   --icon-bg: #fff;
 
   --badge-border: rgba(0,0,0,.12);
+
+  /* menu */
+  --menu-bg: var(--surface);
+  --menu-shadow: 0 16px 44px rgba(0,0,0,.14);
+  --menu-item-hover: var(--panel-grad-2);
 }
 
 /* Auto dark mode (prefers-color-scheme) */
@@ -57,6 +62,9 @@
     --icon-bg: #0f1116;
 
     --badge-border: rgba(255,255,255,.14);
+
+    --menu-shadow: 0 18px 54px rgba(0,0,0,.55);
+    --menu-item-hover: rgba(255,255,255,.06);
   }
 }
 
@@ -82,6 +90,9 @@
   --icon-bg: #fff;
 
   --badge-border: rgba(0,0,0,.12);
+
+  --menu-shadow: 0 16px 44px rgba(0,0,0,.14);
+  --menu-item-hover: var(--panel-grad-2);
 }
 
 :root[data-theme="dark"]{
@@ -105,6 +116,9 @@
   --icon-bg: #0f1116;
 
   --badge-border: rgba(255,255,255,.14);
+
+  --menu-shadow: 0 18px 54px rgba(0,0,0,.55);
+  --menu-item-hover: rgba(255,255,255,.06);
 }
 
 /* =========================
@@ -124,8 +138,9 @@ body{
    TOPBAR
 ========================= */
 .topbar{
-  position:sticky; top:0; z-index:5;
+  position:sticky; top:0; z-index:50;
   display:flex; align-items:center; justify-content:space-between;
+  gap:14px;
   padding:14px 18px;
   background: var(--topbar-bg);
   backdrop-filter: blur(10px);
@@ -137,18 +152,43 @@ body{
   padding-right: calc(18px + env(safe-area-inset-right));
 }
 
-.brand{ display:flex; gap:12px; align-items:center; }
+.brand{ display:flex; gap:12px; align-items:center; min-width: 0; }
 .logo{
   width:42px; height:42px;
   display:grid; place-items:center;
   background: var(--surface2);
   border:1px solid var(--border);
   border-radius: 14px;
+  flex: 0 0 auto;
 }
-.title{ font-weight:700; letter-spacing:.2px; }
-.subtitle{ color:var(--muted); font-size:13px; margin-top:2px; }
+.title{
+  font-weight:800;
+  letter-spacing:.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-.actions{ display:flex; gap:10px; }
+.topbar-right{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:10px;
+  flex: 0 0 auto;
+}
+
+.primary-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap: nowrap;
+}
+
+.menu-wrap{
+  position: relative;
+  display:flex;
+  align-items:center;
+}
 
 /* =========================
    LAYOUT
@@ -392,13 +432,15 @@ body{
   padding:10px 12px;
   border-radius: 14px;
   cursor:pointer;
-  font-weight:700;
+  font-weight:800;
   color: var(--text);
   text-decoration: none;
   display:inline-flex;
   align-items:center;
+  justify-content:center;
   gap:8px;
   -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
 }
 
 .btn:hover{ background: var(--panel-grad-2); }
@@ -431,6 +473,9 @@ body{
   font-size:18px;
   color: var(--text);
   -webkit-tap-highlight-color: transparent;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
 }
 .icon-btn:hover{ background: var(--panel-grad-2); }
 
@@ -451,7 +496,7 @@ body{
 .textarea{ resize: vertical; }
 
 .field{ display:flex; flex-direction:column; gap:8px; }
-.field label{ font-size:12px; color: var(--muted); font-weight:700; }
+.field label{ font-size:12px; color: var(--muted); font-weight:800; }
 
 .row{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
 
@@ -466,9 +511,49 @@ body{
   background: var(--surface2);
   color: var(--text);
   text-decoration:none;
-  font-weight:800;
+  font-weight:900;
 }
 .link-btn:hover{ background: var(--panel-grad-2); }
+
+/* =========================
+   MENU (Hamburger dropdown)
+========================= */
+.menu{
+  position:absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 220px;
+  max-width: min(320px, calc(100vw - 28px));
+  background: var(--menu-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--menu-shadow);
+  overflow: hidden;
+  z-index: 999;
+}
+
+.menu-item{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 12px;
+  border:0;
+  background: transparent;
+  color: var(--text);
+  text-decoration:none;
+  font-weight:800;
+  cursor:pointer;
+  text-align:left;
+}
+
+.menu-item:hover{
+  background: var(--menu-item-hover);
+}
+
+.menu-item + .menu-item{
+  border-top:1px solid var(--border);
+}
 
 /* =========================
    MODAL
@@ -505,39 +590,43 @@ body{
 .spacer{ flex:1; }
 
 /* =========================
-   MOBILE OPTIMIZATION (FIXED)
+   MOBILE OPTIMIZATION (Topbar + Menu)
 ========================= */
 @media (max-width: 720px){
-
-  /* Topbar stacks cleanly */
   .topbar{
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
     gap: 10px;
   }
 
-  /* Subtitle wastes space on mobile */
-  .subtitle{ display:none; }
+  /* keep title readable */
+  .brand{ max-width: 52vw; }
+  .title{ font-size: 15px; }
 
-  /* Actions as grid: prevents TimeTracker getting huge */
-  .actions{
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+  /* right side stays single row */
+  .topbar-right{
+    gap: 8px;
   }
 
-  .actions .btn{
-    justify-content: center;
-    padding: 12px 12px;
-    border-radius: 16px;
-    min-height: 46px;
-    white-space: nowrap;
+  /* ensure buttons remain one clean line */
+  .primary-actions{
+    gap: 8px;
   }
 
-  /* Primary CTA full width */
-  #btnAdd{
-    grid-column: 1 / -1;
+  .primary-actions .btn{
+    padding: 10px 10px;
+    border-radius: 14px;
+    min-height: 40px;
+  }
+
+  #btnAdd.btn-primary{
+    padding: 10px 12px;
+  }
+
+  .icon-btn{
+    width:40px; height:40px;
+    border-radius: 14px;
   }
 
   /* Layout tighter */
@@ -573,7 +662,7 @@ body{
     gap: 12px;
   }
 
-  /* Calendar: denser, more balanced */
+  /* Calendar */
   .calendar{ padding: 10px; }
 
   .weekday-row{
@@ -597,7 +686,7 @@ body{
     height: 9px;
   }
 
-  /* Legend tighter */
+  /* Legend */
   .legend{
     padding: 0 10px 12px;
     gap: 8px;
@@ -621,13 +710,13 @@ body{
     flex-direction: column;
   }
 
-  /* List: more usable */
+  /* List more usable */
   .list{
     max-height: 520px;
     padding: 10px 12px 6px;
   }
 
-  /* IO full width buttons */
+  /* IO full width */
   .io{
     padding: 10px 12px 12px;
     flex-direction: column;
@@ -677,8 +766,9 @@ body{
 
 /* very small devices */
 @media (max-width: 360px){
-  .actions{ grid-template-columns: 1fr; }
-  #btnAdd{ grid-column: auto; }
-  .weekday-row{ font-size: 10px; }
-  .day{ min-height: 52px; }
+  .brand{ max-width: 48vw; }
+  .title{ font-size: 14px; }
+  .primary-actions .btn{
+    padding: 10px 8px;
+  }
 }
