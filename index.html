@@ -9,6 +9,9 @@
   <link rel="manifest" href="./manifest.json" />
   <meta name="theme-color" content="#ffffff" />
 
+  <!-- Better dark mode rendering on mobile -->
+  <meta name="color-scheme" content="light dark" />
+
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
@@ -22,6 +25,10 @@
     </div>
 
     <div class="actions">
+      <a class="btn" href="https://past0r3m.github.io/SimpleTimeTracker/" target="_blank" rel="noreferrer" title="SimpleTimeTracker öffnen">
+        TimeTracker
+      </a>
+      <button id="btnTheme" class="btn" title="Theme umschalten">Theme</button>
       <button id="btnToday" class="btn">Heute</button>
       <button id="btnAdd" class="btn btn-primary">+ Eintrag</button>
     </div>
@@ -57,6 +64,7 @@
       <div class="legend">
         <div class="pill pill-vac">Urlaub</div>
         <div class="pill pill-sick">Krank</div>
+        <div class="pill pill-work">Arbeit</div>
         <div class="pill pill-ho">Homeoffice</div>
         <div class="pill pill-other">Sonstiges</div>
       </div>
@@ -79,6 +87,10 @@
             <div class="v" id="sumSick">0</div>
           </div>
           <div class="summary-item">
+            <div class="k">Arbeitstage</div>
+            <div class="v" id="sumWork">0</div>
+          </div>
+          <div class="summary-item">
             <div class="k">Homeoffice</div>
             <div class="v" id="sumHO">0</div>
           </div>
@@ -94,6 +106,7 @@
             <option value="all">Alle Typen</option>
             <option value="vacation">Urlaub</option>
             <option value="sick">Krank</option>
+            <option value="work">Arbeit</option>
             <option value="homeoffice">Homeoffice</option>
             <option value="other">Sonstiges</option>
           </select>
@@ -147,14 +160,22 @@
         <select id="type" class="select">
           <option value="vacation">Urlaub</option>
           <option value="sick">Krank</option>
+          <option value="work">Arbeit</option>
           <option value="homeoffice">Homeoffice</option>
           <option value="other">Sonstiges</option>
         </select>
       </div>
 
+      <div class="field" id="workLinkWrap" style="display:none;">
+        <label>Time Tracker</label>
+        <a id="workLink" class="link-btn" href="https://past0r3m.github.io/SimpleTimeTracker/" target="_blank" rel="noreferrer">
+          SimpleTimeTracker öffnen
+        </a>
+      </div>
+
       <div class="field">
         <label for="title">Titel (optional)</label>
-        <input id="title" class="input" type="text" placeholder="z.B. Sommerurlaub / Arzt / HO" maxlength="60" />
+        <input id="title" class="input" type="text" placeholder="z.B. Sommerurlaub / Arzt / Arbeit / HO" maxlength="60" />
       </div>
 
       <div class="row">
