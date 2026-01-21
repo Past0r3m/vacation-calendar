@@ -505,126 +505,143 @@ body{
 .spacer{ flex:1; }
 
 /* =========================
-   MOBILE OPTIMIZATION
+   MOBILE OPTIMIZATION (FIXED)
 ========================= */
 @media (max-width: 720px){
-  /* Header stacks + thumb-friendly buttons */
+
+  /* Topbar stacks cleanly */
   .topbar{
-    flex-direction:column;
-    align-items:stretch;
-    gap:10px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
   }
 
+  /* Subtitle wastes space on mobile */
+  .subtitle{ display:none; }
+
+  /* Actions as grid: prevents TimeTracker getting huge */
   .actions{
-    width:100%;
-    flex-wrap:wrap;
-    gap:10px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
   }
 
   .actions .btn{
-    flex: 1 1 calc(50% - 10px);
-    justify-content:center;
-    padding:12px 12px;
+    justify-content: center;
+    padding: 12px 12px;
     border-radius: 16px;
+    min-height: 46px;
+    white-space: nowrap;
   }
 
-  #btnAdd.btn-primary{
-    flex: 1 1 100%;
+  /* Primary CTA full width */
+  #btnAdd{
+    grid-column: 1 / -1;
   }
 
   /* Layout tighter */
   .layout{
-    padding:12px;
-    gap:12px;
+    padding: 12px;
+    gap: 12px;
   }
 
-  /* Panel head wraps better */
+  /* Panel head: month nav row, toggles row */
   .panel-head{
-    padding:12px 12px;
-    gap:10px;
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .month-nav{
+    width: 100%;
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    gap: 10px;
   }
 
   .month-title{
     min-width: 0;
-    font-size:16px;
+    font-size: 16px;
+    text-align: center;
+    flex: 1;
   }
 
-  /* Calendar: reduce spacing so 7 cols fit nicely */
-  .calendar{ padding: 10px 10px 12px; }
+  .panel-tools{
+    width: 100%;
+    justify-content: flex-start;
+    gap: 12px;
+  }
+
+  /* Calendar: denser, more balanced */
+  .calendar{ padding: 10px; }
 
   .weekday-row{
-    gap:6px;
-    font-size:11px;
+    gap: 6px;
+    font-size: 11px;
     padding: 6px 2px 8px;
   }
 
-  .grid{
-    gap:6px;
-  }
+  .grid{ gap: 6px; }
 
   .day{
-    min-height: 64px;
-    padding:8px 8px 7px;
-    border-radius: 14px;
+    min-height: 54px;
+    padding: 8px;
+    border-radius: 12px;
   }
 
-  .day-num{
-    font-size:13px;
-  }
+  .day-num{ font-size: 13px; }
 
   .badge{
-    width:9px;
-    height:9px;
+    width: 9px;
+    height: 9px;
   }
 
+  /* Legend tighter */
   .legend{
     padding: 0 10px 12px;
-    gap:8px;
+    gap: 8px;
   }
 
   .pill{
-    font-size:11px;
-    padding:6px 10px;
+    font-size: 11px;
+    padding: 6px 10px;
   }
 
   /* Cards */
-  .card-head{
-    padding:12px 12px;
-  }
+  .card-head{ padding: 12px; }
 
   .summary-grid{
-    padding: 12px 12px 14px;
-    gap:10px;
-  }
-
-  .summary-item{
-    border-radius: 16px;
+    padding: 12px;
+    gap: 10px;
   }
 
   .card-actions{
     padding: 0 12px 12px;
-    flex-direction:column;
+    flex-direction: column;
   }
 
-  /* List more usable on mobile */
+  /* List: more usable */
   .list{
-    max-height: 420px;
+    max-height: 520px;
     padding: 10px 12px 6px;
   }
 
+  /* IO full width buttons */
   .io{
     padding: 10px 12px 12px;
-    flex-direction:column;
+    flex-direction: column;
   }
 
   .io .btn{
-    width:100%;
-    justify-content:center;
-    padding:12px 12px;
+    width: 100%;
+    justify-content: center;
+    padding: 12px 12px;
     border-radius: 16px;
+    min-height: 46px;
   }
 
-  /* Modal: near fullscreen, proper scrolling (Safari iOS) */
+  /* Modal near fullscreen */
   .modal{
     width: calc(100% - 16px);
     margin: 8px auto;
@@ -634,14 +651,12 @@ body{
 
   .modal-body{
     max-height: calc(100dvh - 28px);
-    overflow:auto;
+    overflow: auto;
     -webkit-overflow-scrolling: touch;
-    padding: 14px 14px 14px;
+    padding: 14px;
   }
 
-  .row{
-    grid-template-columns: 1fr;
-  }
+  .row{ grid-template-columns: 1fr; }
 
   .modal-foot{
     flex-wrap: wrap;
@@ -649,19 +664,21 @@ body{
 
   .modal-foot .btn{
     flex: 1 1 calc(50% - 10px);
-    justify-content:center;
-    padding:12px 12px;
+    justify-content: center;
+    padding: 12px;
     border-radius: 16px;
+    min-height: 46px;
   }
 
-  #btnSave.btn-primary{
+  #btnSave{
     flex: 1 1 100%;
   }
 }
 
 /* very small devices */
 @media (max-width: 360px){
-  .actions .btn{ flex: 1 1 100%; }
-  .weekday-row{ font-size:10px; }
-  .day{ min-height: 60px; }
+  .actions{ grid-template-columns: 1fr; }
+  #btnAdd{ grid-column: auto; }
+  .weekday-row{ font-size: 10px; }
+  .day{ min-height: 52px; }
 }
