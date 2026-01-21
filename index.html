@@ -20,17 +20,50 @@
       <div class="logo" aria-hidden="true">📅</div>
       <div>
         <div class="title">Urlaubs-Kalender</div>
-        <div class="subtitle">Offline · lokal gespeichert · schnelle Übersicht</div>
       </div>
     </div>
 
-    <div class="actions">
-      <a class="btn" href="https://past0r3m.github.io/SimpleTimeTracker/" target="_blank" rel="noreferrer" title="SimpleTimeTracker öffnen">
-        TimeTracker
-      </a>
-      <button id="btnTheme" class="btn" title="Theme umschalten">Theme</button>
-      <button id="btnToday" class="btn">Heute</button>
-      <button id="btnAdd" class="btn btn-primary">+ Eintrag</button>
+    <div class="topbar-right">
+      <!-- Primary actions (always in one clean row) -->
+      <div class="primary-actions">
+        <button id="btnToday" class="btn" type="button">Heute</button>
+        <button id="btnAdd" class="btn btn-primary" type="button">+ Eintrag</button>
+      </div>
+
+      <!-- Hamburger menu -->
+      <div class="menu-wrap">
+        <button
+          id="btnMenu"
+          class="icon-btn"
+          type="button"
+          aria-label="Menü öffnen"
+          aria-haspopup="menu"
+          aria-expanded="false"
+          aria-controls="topbarMenu"
+        >☰</button>
+
+        <div id="topbarMenu" class="menu" role="menu" aria-label="Menü" hidden>
+          <a
+            class="menu-item"
+            role="menuitem"
+            href="https://past0r3m.github.io/SimpleTimeTracker/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            TimeTracker öffnen
+          </a>
+
+          <button
+            id="btnTheme"
+            class="menu-item"
+            role="menuitem"
+            type="button"
+            title="Theme umschalten"
+          >
+            Theme umschalten
+          </button>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -122,13 +155,13 @@
         <div id="entryList" class="list"></div>
 
         <div class="io">
-          <button id="btnExportJSON" class="btn">Export JSON</button>
-          <button id="btnImportJSON" class="btn">Import JSON</button>
+          <button id="btnExportJSON" class="btn" type="button">Export JSON</button>
+          <button id="btnImportJSON" class="btn" type="button">Import JSON</button>
           <input id="importFile" type="file" accept="application/json" hidden />
         </div>
 
         <div class="io">
-          <button id="btnExportICS" class="btn">Export ICS</button>
+          <button id="btnExportICS" class="btn" type="button">Export ICS</button>
         </div>
       </section>
 
