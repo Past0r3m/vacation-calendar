@@ -1,0 +1,20 @@
+{
+  "name": "Urlaubs-Kalender (Privat)",
+  "short_name": "Urlaub",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='192' height='192'%3E%3Crect width='192' height='192' rx='40' fill='%23ffffff'/%3E%3Crect x='18' y='30' width='156' height='138' rx='24' fill='%23f6f7f8' stroke='%23e6e7ea'/%3E%3Crect x='18' y='30' width='156' height='34' rx='24' fill='%23111'/%3E%3Ctext x='96' y='123' font-size='72' text-anchor='middle'%3E%F0%9F%93%85%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='512' height='512'%3E%3Crect width='512' height='512' rx='96' fill='%23ffffff'/%3E%3Crect x='48' y='80' width='416' height='360' rx='64' fill='%23f6f7f8' stroke='%23e6e7ea'/%3E%3Crect x='48' y='80' width='416' height='92' rx='64' fill='%23111'/%3E%3Ctext x='256' y='330' font-size='180' text-anchor='middle'%3E%F0%9F%93%85%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

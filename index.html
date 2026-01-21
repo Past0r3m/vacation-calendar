@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Urlaubs-Kalender – Privat</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="theme-color" content="#ffffff" />
+
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">📅</div>
+      <div>
+        <div class="title">Urlaubs-Kalender</div>
+        <div class="subtitle">Offline · lokal gespeichert · schnelle Übersicht</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="btnToday" class="btn">Heute</button>
+      <button id="btnAdd" class="btn btn-primary">+ Eintrag</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel">
+      <div class="panel-head">
+        <div class="month-nav">
+          <button id="btnPrev" class="icon-btn" aria-label="Vorheriger Monat">‹</button>
+          <div class="month-title" id="monthTitle">—</div>
+          <button id="btnNext" class="icon-btn" aria-label="Nächster Monat">›</button>
+        </div>
+
+        <div class="panel-tools">
+          <label class="toggle">
+            <input type="checkbox" id="toggleCountWeekends" />
+            <span>Wochenenden zählen</span>
+          </label>
+
+          <label class="toggle">
+            <input type="checkbox" id="toggleHighlightWeekends" checked />
+            <span>Wochenenden markieren</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="calendar">
+        <div class="weekday-row" id="weekdayRow"></div>
+        <div class="grid" id="calendarGrid"></div>
+      </div>
+
+      <div class="legend">
+        <div class="pill pill-vac">Urlaub</div>
+        <div class="pill pill-sick">Krank</div>
+        <div class="pill pill-ho">Homeoffice</div>
+        <div class="pill pill-other">Sonstiges</div>
+      </div>
+    </section>
+
+    <aside class="sidebar">
+      <section class="card">
+        <div class="card-head">
+          <div class="card-title">Übersicht</div>
+          <div class="card-subtitle" id="summaryRange">—</div>
+        </div>
+
+        <div class="summary-grid">
+          <div class="summary-item">
+            <div class="k">Urlaubstage</div>
+            <div class="v" id="sumVacation">0</div>
+          </div>
+          <div class="summary-item">
+            <div class="k">Kranktage</div>
+            <div class="v" id="sumSick">0</div>
+          </div>
+          <div class="summary-item">
+            <div class="k">Homeoffice</div>
+            <div class="v" id="sumHO">0</div>
+          </div>
+          <div class="summary-item">
+            <div class="k">Sonstiges</div>
+            <div class="v" id="sumOther">0</div>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <select id="filterYear" class="select"></select>
+          <select id="filterType" class="select">
+            <option value="all">Alle Typen</option>
+            <option value="vacation">Urlaub</option>
+            <option value="sick">Krank</option>
+            <option value="homeoffice">Homeoffice</option>
+            <option value="other">Sonstiges</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <div class="card-title">Einträge</div>
+          <div class="card-subtitle">Klick = Details · Editieren · Löschen</div>
+        </div>
+
+        <div id="entryList" class="list"></div>
+
+        <div class="io">
+          <button id="btnExportJSON" class="btn">Export JSON</button>
+          <button id="btnImportJSON" class="btn">Import JSON</button>
+          <input id="importFile" type="file" accept="application/json" hidden />
+        </div>
+
+        <div class="io">
+          <button id="btnExportICS" class="btn">Export ICS</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <div class="card-title">Hinweise</div>
+        </div>
+        <ul class="notes">
+          <li>Alles läuft offline; Daten bleiben im Browser (localStorage).</li>
+          <li>Range zählt pro Tag; optional Wochenenden ein/aus.</li>
+          <li>ICS-Export lässt dich den Kram in Apple/Google/Outlook importieren.</li>
+        </ul>
+      </section>
+    </aside>
+  </main>
+
+  <!-- Modal -->
+  <dialog id="modal" class="modal">
+    <form method="dialog" id="modalForm" class="modal-body">
+      <div class="modal-head">
+        <div class="modal-title" id="modalTitle">Neuer Eintrag</div>
+        <button class="icon-btn" value="cancel" aria-label="Schließen">✕</button>
+      </div>
+
+      <input type="hidden" id="entryId" />
+
+      <div class="field">
+        <label for="type">Typ</label>
+        <select id="type" class="select">
+          <option value="vacation">Urlaub</option>
+          <option value="sick">Krank</option>
+          <option value="homeoffice">Homeoffice</option>
+          <option value="other">Sonstiges</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="title">Titel (optional)</label>
+        <input id="title" class="input" type="text" placeholder="z.B. Sommerurlaub / Arzt / HO" maxlength="60" />
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="start">Von</label>
+          <input id="start" class="input" type="date" required />
+        </div>
+        <div class="field">
+          <label for="end">Bis</label>
+          <input id="end" class="input" type="date" required />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="note">Notiz (optional)</label>
+        <textarea id="note" class="textarea" rows="3" placeholder="z.B. Reise / Gründe / Ticket-Nr."></textarea>
+      </div>
+
+      <div class="modal-foot">
+        <button id="btnDelete" class="btn btn-danger" type="button">Löschen</button>
+        <div class="spacer"></div>
+        <button class="btn" value="cancel" type="button" id="btnCancel">Abbrechen</button>
+        <button class="btn btn-primary" value="default" type="submit" id="btnSave">Speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="./app.js"></script>
+</body>
+</html>
