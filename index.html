@@ -8,8 +8,6 @@
   <!-- PWA -->
   <link rel="manifest" href="./manifest.json" />
   <meta name="theme-color" content="#ffffff" />
-
-  <!-- Better dark mode rendering on mobile -->
   <meta name="color-scheme" content="light dark" />
 
   <link rel="stylesheet" href="./style.css" />
@@ -18,54 +16,35 @@
   <header class="topbar">
     <div class="brand">
       <div class="logo" aria-hidden="true">📅</div>
-      <div>
-        <div class="title">Urlaubs-Kalender</div>
-      </div>
+      <div class="title">Urlaubs-Kalender</div>
     </div>
 
     <div class="topbar-right">
-      <!-- Primary actions (always in one clean row) -->
-      <div class="primary-actions">
-        <button id="btnToday" class="btn" type="button">Heute</button>
-        <button id="btnAdd" class="btn btn-primary" type="button">+ Eintrag</button>
+      <div class="primary-actions" aria-label="Hauptaktionen">
+        <button id="btnToday" class="btn">Heute</button>
+        <button id="btnAdd" class="btn btn-primary">+ Eintrag</button>
       </div>
 
-      <!-- Hamburger menu -->
       <div class="menu-wrap">
-        <button
-          id="btnMenu"
-          class="icon-btn"
-          type="button"
-          aria-label="Menü öffnen"
-          aria-haspopup="menu"
-          aria-expanded="false"
-          aria-controls="topbarMenu"
-        >☰</button>
+        <button id="btnMenu" class="icon-btn menu-btn" aria-label="Menü" aria-expanded="false" aria-controls="menu">
+          <span class="hamburger" aria-hidden="true"></span>
+        </button>
 
-        <div id="topbarMenu" class="menu" role="menu" aria-label="Menü" hidden>
-          <a
-            class="menu-item"
-            role="menuitem"
-            href="https://past0r3m.github.io/SimpleTimeTracker/"
-            target="_blank"
-            rel="noreferrer"
-          >
+        <!-- Dropdown -->
+        <div id="menu" class="menu" hidden>
+          <a class="menu-item" href="https://past0r3m.github.io/SimpleTimeTracker/" target="_blank" rel="noreferrer">
             TimeTracker öffnen
           </a>
-
-          <button
-            id="btnTheme"
-            class="menu-item"
-            role="menuitem"
-            type="button"
-            title="Theme umschalten"
-          >
-            Theme umschalten
+          <button id="btnTheme" class="menu-item btnlike" type="button">
+            Theme: Auto
           </button>
         </div>
       </div>
     </div>
   </header>
+
+  <!-- Backdrop: nur aktiv wenn Menü offen -->
+  <div id="menuBackdrop" class="menu-backdrop" hidden></div>
 
   <main class="layout">
     <section class="panel">
@@ -155,13 +134,13 @@
         <div id="entryList" class="list"></div>
 
         <div class="io">
-          <button id="btnExportJSON" class="btn" type="button">Export JSON</button>
-          <button id="btnImportJSON" class="btn" type="button">Import JSON</button>
+          <button id="btnExportJSON" class="btn">Export JSON</button>
+          <button id="btnImportJSON" class="btn">Import JSON</button>
           <input id="importFile" type="file" accept="application/json" hidden />
         </div>
 
         <div class="io">
-          <button id="btnExportICS" class="btn" type="button">Export ICS</button>
+          <button id="btnExportICS" class="btn">Export ICS</button>
         </div>
       </section>
 
