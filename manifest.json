@@ -1,10 +1,27 @@
 {
   "name": "Urlaubs-Kalender (Privat)",
   "short_name": "Urlaub",
-  "start_url": "./index.html",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
+  "shortcuts": [
+    {
+      "name": "TimeTracker öffnen",
+      "short_name": "TimeTracker",
+      "url": "https://past0r3m.github.io/SimpleTimeTracker/",
+      "description": "Zum SimpleTimeTracker wechseln"
+    },
+    {
+      "name": "Kalender öffnen",
+      "short_name": "Kalender",
+      "url": "./",
+      "description": "Urlaubs-Kalender öffnen"
+    }
+  ],
   "icons": [
     {
       "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='192' height='192'%3E%3Crect width='192' height='192' rx='40' fill='%23ffffff'/%3E%3Crect x='18' y='30' width='156' height='138' rx='24' fill='%23f6f7f8' stroke='%23e6e7ea'/%3E%3Crect x='18' y='30' width='156' height='34' rx='24' fill='%23111'/%3E%3Ctext x='96' y='123' font-size='72' text-anchor='middle'%3E%F0%9F%93%85%3C/text%3E%3C/svg%3E",
