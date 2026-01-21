@@ -1,23 +1,27 @@
 /* Urlaubs-Kalender – Offline / localStorage
    - Monatsansicht
    - Einträge als Datumsbereich (start/end)
-   - Typen: vacation/sick/homeoffice/other
+   - Typen: vacation/sick/work/homeoffice/other
    - Wochenenden zählen optional
+   - Dark Mode (auto + toggle)
    - Export/Import JSON
    - Export ICS
 */
 
 const STORAGE_KEY = "vacationCalendar.entries.v1";
 const SETTINGS_KEY = "vacationCalendar.settings.v1";
+const TIME_TRACKER_URL = "https://past0r3m.github.io/SimpleTimeTracker/";
 
 const TYPE_LABEL = {
   vacation: "Urlaub",
   sick: "Krank",
+  work: "Arbeit",
   homeoffice: "Homeoffice",
   other: "Sonstiges"
 };
 
-const TYPE_ORDER = ["vacation", "sick", "homeoffice", "other"];
+const TYPE_ORDER = ["vacation", "sick", "work", "homeoffice", "other"];
+const THEME_ORDER = ["auto", "light", "dark"];
 
 const els = {
   monthTitle: document.getElementById("monthTitle"),
@@ -29,12 +33,15 @@ const els = {
   btnToday: document.getElementById("btnToday"),
   btnAdd: document.getElementById("btnAdd"),
 
+  btnTheme: document.getElementById("btnTheme"),
+
   toggleCountWeekends: document.getElementById("toggleCountWeekends"),
   toggleHighlightWeekends: document.getElementById("toggleHighlightWeekends"),
 
   summaryRange: document.getElementById("summaryRange"),
   sumVacation: document.getElementById("sumVacation"),
   sumSick: document.getElementById("sumSick"),
+  sumWork: document.getElementById("sumWork"),
   sumHO: document.getElementById("sumHO"),
   sumOther: document.getElementById("sumOther"),
 
@@ -60,6 +67,9 @@ const els = {
   btnDelete: document.getElementById("btnDelete"),
   btnCancel: document.getElementById("btnCancel"),
   btnSave: document.getElementById("btnSave"),
+
+  workLinkWrap: document.getElementById("workLinkWrap"),
+  workLink: document.getElementById("workLink"),
 };
 
 let state = {
@@ -67,7 +77,8 @@ let state = {
   entries: [],
   settings: {
     countWeekends: false,
-    highlightWeekends: true
+    highlightWeekends: true,
+    theme: "auto" // auto | light | dark
   }
 };
 
@@ -79,6 +90,12 @@ function init(){
 
   els.toggleCountWeekends.checked = !!state.settings.countWeekends;
   els.toggleHighlightWeekends.checked = !!state.settings.highlightWeekends;
+
+  // Ensure tracker link is correct
+  if (els.workLink) els.workLink.href = TIME_TRACKER_URL;
+
+  applyTheme(state.settings.theme);
+  updateThemeButtonLabel();
 
   renderWeekdays();
   wireEvents();
@@ -97,6 +114,19 @@ function wireEvents(){
   els.btnToday.addEventListener("click", () => { state.viewDate = startOfMonth(new Date()); renderAll(); });
 
   els.btnAdd.addEventListener("click", () => openModalForCreate());
+
+  if (els.btnTheme) {
+    els.btnTheme.addEventListener("click", () => {
+      // cycle: auto -> light -> dark -> auto
+      const current = state.settings.theme || "auto";
+      const idx = THEME_ORDER.indexOf(current);
+      const next = THEME_ORDER[(idx + 1) % THEME_ORDER.length];
+      state.settings.theme = next;
+      saveSettings();
+      applyTheme(next);
+      updateThemeButtonLabel();
+    });
+  }
 
   els.toggleCountWeekends.addEventListener("change", () => {
     state.settings.countWeekends = els.toggleCountWeekends.checked;
@@ -119,6 +149,7 @@ function wireEvents(){
 
   els.btnExportICS.addEventListener("click", exportICS);
 
+  // Modal interactions
   els.modalForm.addEventListener("submit", (e) => {
     e.preventDefault();
     saveFromModal();
@@ -133,6 +164,41 @@ function wireEvents(){
   });
 
   els.btnCancel.addEventListener("click", () => els.modal.close());
+
+  // Show/hide TimeTracker link for work
+  if (els.type) {
+    els.type.addEventListener("change", () => syncWorkLinkVisibility(els.type.value));
+  }
+}
+
+function applyTheme(mode){
+  const root = document.documentElement;
+  const m = mode || "auto";
+
+  if (m === "auto") {
+    delete root.dataset.theme; // allow prefers-color-scheme
+  } else {
+    root.dataset.theme = m; // "light" or "dark"
+  }
+
+  // Optional: update theme-color meta to match (nice on mobile)
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) {
+    if (m === "dark") meta.setAttribute("content", "#0b0c0f");
+    else meta.setAttribute("content", "#ffffff");
+  }
+}
+
+function updateThemeButtonLabel(){
+  if (!els.btnTheme) return;
+  const m = state.settings.theme || "auto";
+  // Keep it simple and obvious
+  els.btnTheme.textContent = (m === "auto") ? "Theme: Auto" : (m === "light" ? "Theme: Hell" : "Theme: Dunkel");
+}
+
+function syncWorkLinkVisibility(type){
+  if (!els.workLinkWrap) return;
+  els.workLinkWrap.style.display = (type === "work") ? "flex" : "none";
 }
 
 function renderWeekdays(){
@@ -195,13 +261,8 @@ function renderCalendar(){
     `;
 
     div.addEventListener("click", () => {
-      // If there is exactly one entry on this day -> open it.
-      // Else open create modal prefilled with this date.
       if (dayEntries.length === 1) {
         openModalForEdit(dayEntries[0].id);
-      } else if (dayEntries.length > 1) {
-        // Open the list scroll position and hint by filter? simplest: open create with date.
-        openModalForCreate(iso);
       } else {
         openModalForCreate(iso);
       }
@@ -216,7 +277,7 @@ function summarizeBadges(dayEntries){
   const seen = new Set(dayEntries.map(e => e.type));
   return Array.from(seen)
     .sort((a,b) => TYPE_ORDER.indexOf(a) - TYPE_ORDER.indexOf(b))
-    .map(t => `<span class="badge ${t}" title="${TYPE_LABEL[t]}"></span>`)
+    .map(t => `<span class="badge ${t}" title="${TYPE_LABEL[t] || t}"></span>`)
     .join("");
 }
 
@@ -232,7 +293,7 @@ function renderListAndSummary(){
   els.entryList.innerHTML = "";
   for (const e of filtered) {
     const days = countDaysInRange(e.start, e.end, state.settings.countWeekends);
-    const title = (e.title || TYPE_LABEL[e.type]);
+    const title = (e.title || TYPE_LABEL[e.type] || e.type);
     const meta = `${formatRange(e.start, e.end)} · ${days} Tag${days===1?"":"e"}`;
     const note = e.note ? `\n${escapeHtml(e.note)}` : "";
 
@@ -241,16 +302,20 @@ function renderListAndSummary(){
     item.innerHTML = `
       <div class="item-title">
         <span>${escapeHtml(title)}</span>
-        <span class="tag ${e.type}">${TYPE_LABEL[e.type]}</span>
+        <span class="tag ${e.type}">${TYPE_LABEL[e.type] || e.type}</span>
       </div>
-      <div class="item-meta">${escapeHtml(meta)}${note ? "<br/>" + note.replace(/\n/g,"<br/>") : ""}</div>
+      <div class="item-meta">
+        ${escapeHtml(meta)}
+        ${note ? "<br/>" + note.replace(/\n/g,"<br/>") : ""}
+        ${e.type === "work" ? `<br/><a href="${TIME_TRACKER_URL}" target="_blank" rel="noreferrer">TimeTracker öffnen</a>` : ""}
+      </div>
     `;
     item.addEventListener("click", () => openModalForEdit(e.id));
     els.entryList.appendChild(item);
   }
 
   // Summary for selected year (ignoring type filter to be useful)
-  const byType = { vacation:0, sick:0, homeoffice:0, other:0 };
+  const byType = { vacation:0, sick:0, work:0, homeoffice:0, other:0 };
 
   for (const e of state.entries) {
     const daysByType = daysByTypeForYear(e, year, state.settings.countWeekends);
@@ -258,10 +323,11 @@ function renderListAndSummary(){
   }
 
   els.summaryRange.textContent = `Jahr ${year}`;
-  els.sumVacation.textContent = `${byType.vacation}`;
-  els.sumSick.textContent = `${byType.sick}`;
-  els.sumHO.textContent = `${byType.homeoffice}`;
-  els.sumOther.textContent = `${byType.other}`;
+  if (els.sumVacation) els.sumVacation.textContent = `${byType.vacation}`;
+  if (els.sumSick) els.sumSick.textContent = `${byType.sick}`;
+  if (els.sumWork) els.sumWork.textContent = `${byType.work}`;
+  if (els.sumHO) els.sumHO.textContent = `${byType.homeoffice}`;
+  if (els.sumOther) els.sumOther.textContent = `${byType.other}`;
 }
 
 function syncYearFilterOptions(){
@@ -274,7 +340,6 @@ function syncYearFilterOptions(){
     years.add(yearFromISO(e.end));
   }
 
-  // Keep a small sane range around current year
   years.add(nowY - 1);
   years.add(nowY + 1);
 
@@ -302,6 +367,8 @@ function openModalForCreate(prefillISO){
   els.start.value = d;
   els.end.value = d;
 
+  syncWorkLinkVisibility(els.type.value);
+
   els.btnDelete.style.display = "none";
   els.modal.showModal();
 }
@@ -317,6 +384,8 @@ function openModalForEdit(id){
   els.start.value = e.start;
   els.end.value = e.end;
   els.note.value = e.note || "";
+
+  syncWorkLinkVisibility(els.type.value);
 
   els.btnDelete.style.display = "inline-flex";
   els.modal.showModal();
@@ -336,7 +405,7 @@ function saveFromModal(){
 
   const payload = {
     id: id || cryptoId(),
-    type,
+    type: TYPE_LABEL[type] ? type : "other",
     title: title || "",
     start: norm.start,
     end: norm.end,
@@ -384,7 +453,7 @@ function countDaysInRange(startISO, endISO, countWeekends){
 }
 
 function daysByTypeForYear(entry, year, countWeekends){
-  const out = { vacation:0, sick:0, homeoffice:0, other:0 };
+  const out = { vacation:0, sick:0, work:0, homeoffice:0, other:0 };
   const allDays = listDaysInRange(entry.start, entry.end);
 
   for (const iso of allDays) {
@@ -412,7 +481,8 @@ function exportJSON(){
     settings: state.settings,
     entries: state.entries
   };
-  downloadFile(`urlaub-kalender_${new Date().toISOString().slice(0,10)}.json`,
+  downloadFile(
+    `urlaub-kalender_${new Date().toISOString().slice(0,10)}.json`,
     JSON.stringify(payload, null, 2),
     "application/json"
   );
@@ -448,10 +518,15 @@ async function importJSON(){
     if (parsed.settings && typeof parsed.settings === "object") {
       state.settings = {
         countWeekends: !!parsed.settings.countWeekends,
-        highlightWeekends: parsed.settings.highlightWeekends !== false
+        highlightWeekends: parsed.settings.highlightWeekends !== false,
+        theme: normalizeTheme(parsed.settings.theme)
       };
       els.toggleCountWeekends.checked = state.settings.countWeekends;
       els.toggleHighlightWeekends.checked = state.settings.highlightWeekends;
+
+      applyTheme(state.settings.theme);
+      updateThemeButtonLabel();
+
       saveSettings();
     }
 
@@ -485,8 +560,8 @@ function exportICS(){
     const start = isoToICSDate(e.start);
     const endExclusive = isoToICSDate(addDays(parseISO(e.end), 1));
 
-    const summaryBase = e.title?.trim() ? e.title.trim() : TYPE_LABEL[e.type];
-    const summary = `${TYPE_LABEL[e.type]}: ${summaryBase}`.slice(0, 80);
+    const summaryBase = e.title?.trim() ? e.title.trim() : (TYPE_LABEL[e.type] || e.type);
+    const summary = `${TYPE_LABEL[e.type] || e.type}: ${summaryBase}`.slice(0, 80);
 
     const uid = `${e.id}@vacation-calendar.local`;
 
@@ -539,19 +614,25 @@ function saveEntries(){
 function loadSettings(){
   try{
     const raw = localStorage.getItem(SETTINGS_KEY);
-    if (!raw) return { countWeekends:false, highlightWeekends:true };
+    if (!raw) return { countWeekends:false, highlightWeekends:true, theme:"auto" };
     const s = JSON.parse(raw);
     return {
       countWeekends: !!s.countWeekends,
-      highlightWeekends: s.highlightWeekends !== false
+      highlightWeekends: s.highlightWeekends !== false,
+      theme: normalizeTheme(s.theme)
     };
   }catch{
-    return { countWeekends:false, highlightWeekends:true };
+    return { countWeekends:false, highlightWeekends:true, theme:"auto" };
   }
 }
 
 function saveSettings(){
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
+}
+
+function normalizeTheme(v){
+  const x = (v || "auto").toString().toLowerCase();
+  return THEME_ORDER.includes(x) ? x : "auto";
 }
 
 /* ---------------------------
@@ -571,7 +652,6 @@ function toISODate(date){
 }
 
 function normalizeISODate(v){
-  // Accept Date, ISO, or anything parseable -> output yyyy-mm-dd
   if (v instanceof Date) return toISODate(v);
   if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
   const dt = new Date(v);
@@ -603,7 +683,6 @@ function addMonths(d, n){
 }
 
 function startOfWeekMonday(d){
-  // Monday as week start. JS: 0=Sun..6=Sat
   const x = new Date(d);
   const dow = x.getDay();
   const offset = (dow === 0) ? -6 : (1 - dow);
@@ -658,7 +737,6 @@ function isoToICSDate(isoOrDate){
 }
 
 function toICSDateTime(d){
-  // UTC timestamp: YYYYMMDDTHHMMSSZ
   const yyyy = d.getUTCFullYear();
   const mm = String(d.getUTCMonth()+1).padStart(2,"0");
   const dd = String(d.getUTCDate()).padStart(2,"0");
